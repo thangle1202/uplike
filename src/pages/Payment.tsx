@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
 import { formatPrice } from "@/lib/utils";
 import { Order } from "@/types/service";
-import { PaymentQR, ORDER_STATUS_LABELS } from "@/types/order";
+import { PaymentQR, getOrderStatusLabel, getOrderStatusColor, isOrderPaid } from "@/types/order";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -41,7 +41,7 @@ export default function Payment() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setOrder(data);
-      toast.success("Thanh toán thành công! Đơn hàng đang được xử lý.");
+      toast.success("Thanh toán thành công! Đơn hàng đang chờ admin xử lý.");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Thanh toán thất bại");
     } finally {
@@ -85,7 +85,7 @@ export default function Payment() {
     );
   }
 
-  const isPaid = order.status !== "ordered";
+  const isPaid = isOrderPaid(order);
 
   return (
     <div className="min-h-screen bg-muted/30 py-8 px-4">
@@ -98,8 +98,8 @@ export default function Payment() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>Thanh toán đơn hàng #{order.id}</CardTitle>
-              <Badge className={isPaid ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}>
-                {ORDER_STATUS_LABELS[order.status as keyof typeof ORDER_STATUS_LABELS] || order.status}
+              <Badge className={getOrderStatusColor(order.status)}>
+                {getOrderStatusLabel(order.status)}
               </Badge>
             </div>
           </CardHeader>
@@ -120,7 +120,7 @@ export default function Payment() {
                 <p className="font-medium">
                   {order.paymentMethod === "wallet" ? "Đã thanh toán bằng ví" : "Đã xác nhận thanh toán"}
                 </p>
-                <p className="text-sm text-muted-foreground">Đơn hàng đang được xử lý. Bạn sẽ nhận email khi hoàn thành.</p>
+                <p className="text-sm text-muted-foreground">Đơn hàng đang chờ admin xử lý.</p>
                 <Button asChild><Link to="/orders">Xem đơn hàng</Link></Button>
               </div>
             ) : (

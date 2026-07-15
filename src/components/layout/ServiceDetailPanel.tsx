@@ -1,5 +1,4 @@
 import { useEffect, useState, type ElementType } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   Link2,
   Server,
@@ -19,7 +18,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { PlatformIcon } from "@/lib/platformIcons";
+import { OrderConfirmDialog } from "@/components/OrderConfirmDialog";
 import { OrderPaymentDialog } from "@/components/OrderPaymentDialog";
+import { OrderPlacedDialog, type PlacedOrderInfo } from "@/components/OrderPlacedDialog";
 import { ContactButtons } from "@/components/ContactFloat";
 
 interface ServiceDetailPanelProps {
@@ -62,7 +63,6 @@ function SectionCard({
 }
 
 export function ServiceDetailPanel({ platform, service }: ServiceDetailPanelProps) {
-  const navigate = useNavigate();
   const { user, token, isAuthenticated, refreshUser } = useAuth();
   const servers = getServiceServers(service);
 
@@ -73,6 +73,8 @@ export function ServiceDetailPanel({ platform, service }: ServiceDetailPanelProp
   const [expandedServer, setExpandedServer] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [paymentOrderId, setPaymentOrderId] = useState<string | null>(null);
+  const [placedOrder, setPlacedOrder] = useState<PlacedOrderInfo | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   useEffect(() => {
     setUrl("");
@@ -95,25 +97,35 @@ export function ServiceDetailPanel({ platform, service }: ServiceDetailPanelProp
 
   const showBuyBar = service.requiresComments || qty > 0;
 
-  const handleBuy = async () => {
+  const validateOrder = () => {
     if (!url.trim()) {
       toast.error("Vui lòng nhập link cần buff");
-      return;
+      return false;
     }
     if (service.requiresComments && validComments.length === 0) {
       toast.error("Vui lòng nhập ít nhất một comment");
-      return;
+      return false;
     }
     if (qty < service.minQuantity || qty > service.maxQuantity) {
       toast.error(
         `Số lượng phải từ ${service.minQuantity.toLocaleString()} đến ${service.maxQuantity.toLocaleString()}`
       );
-      return;
+      return false;
     }
     if (!selectedServer) {
       toast.error("Vui lòng chọn server");
-      return;
+      return false;
     }
+    return true;
+  };
+
+  const handleBuy = () => {
+    if (!validateOrder()) return;
+    setConfirmOpen(true);
+  };
+
+  const submitOrder = async () => {
+    if (!selectedServer || !validateOrder()) return;
 
     setSubmitting(true);
     try {
@@ -147,6 +159,7 @@ export function ServiceDetailPanel({ platform, service }: ServiceDetailPanelProp
       const order = await orderRes.json();
       if (!orderRes.ok) throw new Error(order.error || "Đặt hàng thất bại");
 
+      let paidWithWallet = false;
       if (isAuthenticated && user && user.walletBalance >= totalPrice) {
         const payRes = await fetch(`/api/payments/order/${order.id}/pay-wallet`, {
           method: "POST",
@@ -154,18 +167,20 @@ export function ServiceDetailPanel({ platform, service }: ServiceDetailPanelProp
         });
         if (payRes.ok) {
           await refreshUser();
-          toast.success("Đặt hàng thành công! Đơn đang được xử lý.");
-          navigate("/orders");
-          return;
+          paidWithWallet = true;
         }
       }
 
-      if (!isAuthenticated) {
-        setPaymentOrderId(order.id);
-        return;
-      }
-
-      navigate(`/payment/${order.id}`);
+      const needsPayment = !paidWithWallet;
+      setPlacedOrder({
+        id: order.id,
+        totalAmount: order.totalAmount,
+        serviceName: service.name,
+        paidWithWallet,
+        needsPayment,
+        contactEmail: order.contact,
+      });
+      setConfirmOpen(false);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Đặt hàng thất bại");
     } finally {
@@ -374,6 +389,38 @@ export function ServiceDetailPanel({ platform, service }: ServiceDetailPanelProp
           </Button>
         </div>
       )}
+
+      <OrderConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        onConfirm={submitOrder}
+        submitting={submitting}
+        platformName={platform.name}
+        serviceName={service.name}
+        serverName={selectedServer?.name ?? ""}
+        url={url.trim()}
+        quantity={qty}
+        unit={service.unit}
+        totalPrice={totalPrice}
+        payWithWallet={!!(isAuthenticated && user && user.walletBalance >= totalPrice)}
+      />
+
+      <OrderPlacedDialog
+        open={!!placedOrder}
+        order={placedOrder}
+        onClose={() => {
+          setPlacedOrder(null);
+          setUrl("");
+          setCommentText("");
+          setQuantity(String(service.minQuantity));
+        }}
+        onPay={() => {
+          if (placedOrder) {
+            setPaymentOrderId(placedOrder.id);
+            setPlacedOrder(null);
+          }
+        }}
+      />
 
       <OrderPaymentDialog
         open={!!paymentOrderId}

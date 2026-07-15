@@ -1,18 +1,48 @@
-export type OrderStatus = "ordered" | "processing" | "done" | "cancelled";
+export type OrderStatus = "pending" | "processing" | "completed" | "cancelled";
+
+/** @deprecated legacy statuses in older orders */
+export type LegacyOrderStatus = "ordered" | "done";
+
+export type AnyOrderStatus = OrderStatus | LegacyOrderStatus;
+
+export function normalizeOrderStatus(status: string): OrderStatus {
+  if (status === "ordered") return "pending";
+  if (status === "done") return "completed";
+  return status as OrderStatus;
+}
 
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
-  ordered: "Chờ thanh toán",
+  pending: "Chờ xử lý",
   processing: "Đang xử lý",
-  done: "Hoàn thành",
+  completed: "Hoàn thành",
   cancelled: "Đã hủy",
 };
 
+export function getOrderStatusLabel(status: string): string {
+  return ORDER_STATUS_LABELS[normalizeOrderStatus(status)] ?? status;
+}
+
 export const ORDER_STATUS_COLORS: Record<OrderStatus, string> = {
-  ordered: "bg-yellow-100 text-yellow-800",
+  pending: "bg-yellow-100 text-yellow-800",
   processing: "bg-blue-100 text-blue-800",
-  done: "bg-green-100 text-green-800",
+  completed: "bg-green-100 text-green-800",
   cancelled: "bg-gray-100 text-gray-600",
 };
+
+export function getOrderStatusColor(status: string): string {
+  return ORDER_STATUS_COLORS[normalizeOrderStatus(status)] ?? "bg-gray-100 text-gray-600";
+}
+
+export function isAwaitingPayment(order: { status: string; paidAt?: string | null }): boolean {
+  const status = normalizeOrderStatus(order.status);
+  return status === "pending" && !order.paidAt;
+}
+
+export function isOrderPaid(order: { status: string; paidAt?: string | null }): boolean {
+  if (order.paidAt) return true;
+  const status = normalizeOrderStatus(order.status);
+  return status === "processing" || status === "completed";
+}
 
 export interface User {
   id: string;
@@ -38,9 +68,9 @@ export interface Deposit {
 export interface AdminStats {
   orders: {
     total: number;
-    ordered: number;
+    pending: number;
     processing: number;
-    done: number;
+    completed: number;
     cancelled: number;
   };
   revenue: {

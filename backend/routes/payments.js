@@ -1,6 +1,7 @@
 import express from "express";
 import { readJson, writeJson, vietnamNow } from "../lib/store.js";
 import { requireAuth, findUserById, getUsersData, saveUsers } from "../lib/auth.js";
+import { isAwaitingPayment } from "../lib/orderStatus.js";
 
 const router = express.Router();
 
@@ -22,7 +23,7 @@ router.get("/order/:orderId/qr", async (req, res) => {
   try {
     const order = await getOrderById(req.params.orderId);
     if (!order) return res.status(404).json({ error: "Order not found" });
-    if (order.status !== "ordered") {
+    if (!isAwaitingPayment(order)) {
       return res.status(400).json({ error: "Order is not awaiting payment" });
     }
 
@@ -50,11 +51,10 @@ router.post("/order/:orderId/confirm-guest", async (req, res) => {
   try {
     const order = await getOrderById(req.params.orderId);
     if (!order) return res.status(404).json({ error: "Order not found" });
-    if (order.status !== "ordered") {
+    if (!isAwaitingPayment(order)) {
       return res.status(400).json({ error: "Order is not awaiting payment" });
     }
 
-    order.status = "processing";
     order.paymentMethod = "guest_qr";
     order.paidAt = vietnamNow().toISOString();
     order.updatedAt = order.paidAt;
@@ -74,7 +74,7 @@ router.post("/order/:orderId/pay-wallet", requireAuth, async (req, res) => {
     if (order.userId && order.userId !== req.userId) {
       return res.status(403).json({ error: "Not your order" });
     }
-    if (order.status !== "ordered") {
+    if (!isAwaitingPayment(order)) {
       return res.status(400).json({ error: "Order is not awaiting payment" });
     }
 
@@ -94,7 +94,6 @@ router.post("/order/:orderId/pay-wallet", requireAuth, async (req, res) => {
     users[userIndex].walletBalance -= order.totalAmount;
     await saveUsers(users);
 
-    order.status = "processing";
     order.paymentMethod = "wallet";
     order.userId = req.userId;
     order.paidAt = vietnamNow().toISOString();

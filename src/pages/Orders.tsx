@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { formatPrice } from "@/lib/utils";
 import { Order } from "@/types/service";
-import { ORDER_STATUS_LABELS, ORDER_STATUS_COLORS } from "@/types/order";
+import { getOrderStatusLabel, getOrderStatusColor, isAwaitingPayment } from "@/types/order";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -52,8 +52,8 @@ export default function OrdersPage() {
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-start">
                   <CardTitle className="text-base">#{order.id}</CardTitle>
-                  <Badge className={ORDER_STATUS_COLORS[order.status as keyof typeof ORDER_STATUS_COLORS]}>
-                    {ORDER_STATUS_LABELS[order.status as keyof typeof ORDER_STATUS_LABELS]}
+                  <Badge className={getOrderStatusColor(order.status)}>
+                    {getOrderStatusLabel(order.status)}
                   </Badge>
                 </div>
                 <p className="text-xs text-muted-foreground">
@@ -62,7 +62,7 @@ export default function OrdersPage() {
               </CardHeader>
               <CardContent className="space-y-2 text-sm">
                 <p>{order.items.length} dịch vụ — <strong>{formatPrice(order.totalAmount)}</strong></p>
-                {order.status === "ordered" && (
+                {isAwaitingPayment(order) && (
                   <Button asChild size="sm"><Link to={`/payment/${order.id}`}>Thanh toán</Link></Button>
                 )}
               </CardContent>

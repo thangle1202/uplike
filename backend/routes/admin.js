@@ -9,6 +9,7 @@ import {
   saveUsers,
   sanitizeUser,
 } from "../lib/auth.js";
+import { isPaidOrder, normalizeOrderStatus } from "../lib/orderStatus.js";
 
 const router = express.Router();
 const __filename = fileURLToPath(import.meta.url);
@@ -104,8 +105,12 @@ router.patch("/services/:platformId/:serviceId/servers", requireAdmin, async (re
   }
 });
 
-function isPaidOrder(order) {
-  return order.status === "processing" || order.status === "done";
+function isPaidOrderForStats(order) {
+  return isPaidOrder(order);
+}
+
+function countByStatus(orders, status) {
+  return orders.filter((o) => normalizeOrderStatus(o.status) === status).length;
 }
 
 function startOfDayVN(date) {
@@ -119,7 +124,7 @@ router.get("/stats", requireAdmin, async (_req, res) => {
   const users = await getUsersData();
   const deposits = await readJson("deposits.json", []);
 
-  const paidOrders = orders.filter(isPaidOrder);
+  const paidOrders = orders.filter(isPaidOrderForStats);
   const totalRevenue = paidOrders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
 
   const now = vietnamNow();
@@ -149,10 +154,10 @@ router.get("/stats", requireAdmin, async (_req, res) => {
   res.json({
     orders: {
       total: orders.length,
-      ordered: orders.filter((o) => o.status === "ordered").length,
-      processing: orders.filter((o) => o.status === "processing").length,
-      done: orders.filter((o) => o.status === "done").length,
-      cancelled: orders.filter((o) => o.status === "cancelled").length,
+      pending: countByStatus(orders, "pending"),
+      processing: countByStatus(orders, "processing"),
+      completed: countByStatus(orders, "completed"),
+      cancelled: countByStatus(orders, "cancelled"),
     },
     revenue: {
       total: totalRevenue,

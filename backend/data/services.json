@@ -17,7 +17,16 @@
           "pricePerUnit": 50,
           "minQuantity": 100,
           "maxQuantity": 50000,
-          "unit": "like"
+          "unit": "like",
+          "servers": [
+            {
+              "id": "sv1",
+              "name": "Like VN",
+              "pricePerUnit": 20,
+              "status": "active",
+              "description": "nhanh"
+            }
+          ]
         },
         {
           "id": "page_followers",
@@ -309,6 +318,84 @@
           "pricePerUnit": 15,
           "minQuantity": 1000,
           "maxQuantity": 10000000,
+          "unit": "view"
+        }
+      ]
+    },
+    {
+      "id": "shopee",
+      "name": "Shopee",
+      "color": "#EE4D2D",
+      "description": "Tăng follow shop, like, đánh giá và view sản phẩm trên Shopee",
+      "services": [
+        {
+          "id": "shop_followers",
+          "name": "Tăng follow shop",
+          "description": "Tăng lượt theo dõi cho shop Shopee",
+          "requiresUrl": true,
+          "requiresComments": false,
+          "urlLabel": "URL shop Shopee",
+          "urlPlaceholder": "https://shopee.vn/shop/...",
+          "pricePerUnit": 90,
+          "minQuantity": 100,
+          "maxQuantity": 50000,
+          "unit": "follow"
+        },
+        {
+          "id": "product_likes",
+          "name": "Tăng like sản phẩm",
+          "description": "Tăng lượt thích cho sản phẩm trên Shopee",
+          "requiresUrl": true,
+          "requiresComments": false,
+          "urlLabel": "URL sản phẩm",
+          "urlPlaceholder": "https://shopee.vn/product/...",
+          "pricePerUnit": 40,
+          "minQuantity": 50,
+          "maxQuantity": 100000,
+          "unit": "like"
+        },
+        {
+          "id": "product_comments",
+          "name": "Tăng đánh giá sản phẩm",
+          "description": "Tăng đánh giá và bình luận cho sản phẩm với nội dung tùy chỉnh",
+          "requiresUrl": true,
+          "requiresComments": true,
+          "urlLabel": "URL sản phẩm",
+          "urlPlaceholder": "https://shopee.vn/product/...",
+          "pricePerUnit": 350,
+          "minQuantity": 10,
+          "maxQuantity": 3000,
+          "unit": "đánh giá",
+          "instructions": [
+            "Mỗi dòng là một nội dung đánh giá riêng.",
+            "Nên viết đánh giá tự nhiên, tránh spam từ khóa."
+          ],
+          "warning": "Không đặt nhiều đơn đánh giá cho cùng một sản phẩm cùng lúc."
+        },
+        {
+          "id": "product_views",
+          "name": "Tăng view sản phẩm",
+          "description": "Tăng lượt xem cho trang sản phẩm Shopee",
+          "requiresUrl": true,
+          "requiresComments": false,
+          "urlLabel": "URL sản phẩm",
+          "urlPlaceholder": "https://shopee.vn/product/...",
+          "pricePerUnit": 8,
+          "minQuantity": 1000,
+          "maxQuantity": 5000000,
+          "unit": "view"
+        },
+        {
+          "id": "live_views",
+          "name": "Tăng view livestream",
+          "description": "Tăng lượt xem cho phiên livestream Shopee",
+          "requiresUrl": true,
+          "requiresComments": false,
+          "urlLabel": "URL livestream",
+          "urlPlaceholder": "https://shopee.vn/...",
+          "pricePerUnit": 12,
+          "minQuantity": 500,
+          "maxQuantity": 1000000,
           "unit": "view"
         }
       ]

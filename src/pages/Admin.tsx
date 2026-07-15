@@ -25,20 +25,25 @@ import {
   ORDER_STATUS_LABELS,
   ORDER_STATUS_COLORS,
   OrderStatus,
+  getOrderStatusLabel,
+  getOrderStatusColor,
+  normalizeOrderStatus,
+  isAwaitingPayment,
+  isOrderPaid,
 } from "@/types/order";
-import { Platform } from "@/types/service";
+import { Platform, ServiceServer } from "@/types/service";
 import { useAuth } from "@/context/AuthContext";
+import { AdminServiceServersPanel } from "@/components/admin/AdminServiceServersPanel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 type Tab = "overview" | "orders" | "users" | "deposits" | "services";
 
-const STATUS_OPTIONS: OrderStatus[] = ["ordered", "processing", "done", "cancelled"];
+const STATUS_OPTIONS: OrderStatus[] = ["pending", "processing", "completed", "cancelled"];
 
 const tabs: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
   { id: "overview", label: "Tổng quan", icon: LayoutDashboard },
@@ -96,7 +101,7 @@ export default function Admin() {
   const [orderFilter, setOrderFilter] = useState<OrderStatus | "all">("all");
   const [userSearch, setUserSearch] = useState("");
   const [selectedService, setSelectedService] = useState<{ platformId: string; serviceId: string } | null>(null);
-  const [serversJson, setServersJson] = useState("");
+  const [savingServers, setSavingServers] = useState(false);
 
   const headers = useCallback(
     () => ({
@@ -190,29 +195,37 @@ export default function Admin() {
     } else toast.error("Xử lý thất bại");
   };
 
-  const saveServers = async () => {
-    if (!selectedService) return;
+  const saveServers = async (
+    platformId: string,
+    serviceId: string,
+    servers: ServiceServer[]
+  ): Promise<boolean> => {
+    setSavingServers(true);
     try {
-      const servers = JSON.parse(serversJson);
-      const res = await fetch(
-        `/api/admin/services/${selectedService.platformId}/${selectedService.serviceId}/servers`,
-        {
-          method: "PATCH",
-          headers: headers(),
-          body: JSON.stringify({ servers }),
-        }
-      );
+      const res = await fetch(`/api/admin/services/${platformId}/${serviceId}/servers`, {
+        method: "PATCH",
+        headers: headers(),
+        body: JSON.stringify({ servers }),
+      });
       if (res.ok) {
         toast.success("Đã lưu servers");
-        loadData();
-      } else toast.error("Lưu thất bại");
+        await loadData();
+        return true;
+      }
+      toast.error("Lưu thất bại");
+      return false;
     } catch {
-      toast.error("JSON không hợp lệ");
+      toast.error("Lưu thất bại");
+      return false;
+    } finally {
+      setSavingServers(false);
     }
   };
 
   const filteredOrders =
-    orderFilter === "all" ? orders : orders.filter((o) => o.status === orderFilter);
+    orderFilter === "all"
+      ? orders
+      : orders.filter((o) => normalizeOrderStatus(o.status) === orderFilter);
 
   const filteredUsers = users.filter(
     (u) =>
@@ -284,7 +297,7 @@ export default function Admin() {
               <StatCard
                 label="Đơn hàng"
                 value={stats.orders.total}
-                sub={`${stats.orders.processing} đang xử lý · ${stats.orders.done} hoàn thành`}
+                sub={`${stats.orders.processing} đang xử lý · ${stats.orders.completed} hoàn thành`}
                 icon={ShoppingBag}
               />
               <StatCard
@@ -298,9 +311,9 @@ export default function Admin() {
             <div className="grid md:grid-cols-5 gap-3">
               {(
                 [
-                  ["ordered", stats.orders.ordered, Clock, "Chờ TT"],
+                  ["pending", stats.orders.pending, Clock, "Chờ xử lý"],
                   ["processing", stats.orders.processing, RefreshCw, "Đang XL"],
-                  ["done", stats.orders.done, CheckCircle2, "Hoàn thành"],
+                  ["completed", stats.orders.completed, CheckCircle2, "Hoàn thành"],
                   ["cancelled", stats.orders.cancelled, XCircle, "Đã hủy"],
                 ] as const
               ).map(([status, count, Icon, label]) => (
@@ -333,8 +346,8 @@ export default function Admin() {
                   >
                     <div>
                       <span className="font-semibold text-sm">#{order.id}</span>
-                      <Badge className={cn("ml-2 text-[10px]", ORDER_STATUS_COLORS[order.status])}>
-                        {ORDER_STATUS_LABELS[order.status]}
+                      <Badge className={cn("ml-2 text-[10px]", getOrderStatusColor(order.status))}>
+                        {getOrderStatusLabel(order.status)}
                       </Badge>
                       <p className="text-xs text-muted-foreground mt-0.5">{order.contact}</p>
                     </div>
@@ -366,7 +379,7 @@ export default function Admin() {
                   variant={orderFilter === s ? "default" : "outline"}
                   onClick={() => setOrderFilter(s)}
                 >
-                  {ORDER_STATUS_LABELS[s]} ({orders.filter((o) => o.status === s).length})
+                  {ORDER_STATUS_LABELS[s]} ({orders.filter((o) => normalizeOrderStatus(o.status) === s).length})
                 </Button>
               ))}
             </div>
@@ -377,8 +390,8 @@ export default function Admin() {
                     <div className="flex flex-wrap justify-between gap-2">
                       <div>
                         <span className="font-bold">#{order.id}</span>
-                        <Badge className={cn("ml-2", ORDER_STATUS_COLORS[order.status])}>
-                          {ORDER_STATUS_LABELS[order.status]}
+                        <Badge className={cn("ml-2", getOrderStatusColor(order.status))}>
+                          {getOrderStatusLabel(order.status)}
                         </Badge>
                       </div>
                       <span className="font-bold text-violet-600">{formatPrice(order.totalAmount)}</span>
@@ -397,7 +410,7 @@ export default function Admin() {
                         <Button
                           key={s}
                           size="sm"
-                          variant={order.status === s ? "default" : "outline"}
+                          variant={normalizeOrderStatus(order.status) === s ? "default" : "outline"}
                           onClick={() => updateOrderStatus(order.id, s)}
                         >
                           {ORDER_STATUS_LABELS[s]}
@@ -511,55 +524,13 @@ export default function Admin() {
         )}
 
         {tab === "services" && servicesData && (
-          <div className="grid md:grid-cols-2 gap-6">
-            <Card className="glass-card border-0">
-              <CardHeader><CardTitle className="text-base">Dịch vụ</CardTitle></CardHeader>
-              <CardContent className="space-y-2 max-h-[60vh] overflow-y-auto">
-                {servicesData.platforms.map((p) =>
-                  p.services.map((s) => (
-                    <button
-                      key={`${p.id}-${s.id}`}
-                      type="button"
-                      className={cn(
-                        "w-full text-left p-3 rounded-xl text-sm transition-all border",
-                        selectedService?.platformId === p.id && selectedService?.serviceId === s.id
-                          ? "bg-violet-50 border-violet-200"
-                          : "hover:bg-muted/50 border-border/50"
-                      )}
-                      onClick={() => {
-                        setSelectedService({ platformId: p.id, serviceId: s.id });
-                        setServersJson(JSON.stringify(s.servers || [], null, 2));
-                      }}
-                    >
-                      <span className="font-medium">{p.name}</span> — {s.name}
-                      <span className="text-muted-foreground ml-1">({(s.servers || []).length} servers)</span>
-                    </button>
-                  ))
-                )}
-              </CardContent>
-            </Card>
-            <Card className="glass-card border-0">
-              <CardHeader><CardTitle className="text-base">Servers JSON</CardTitle></CardHeader>
-              <CardContent className="space-y-3">
-                {selectedService ? (
-                  <>
-                    <Textarea
-                      rows={16}
-                      value={serversJson}
-                      onChange={(e) => setServersJson(e.target.value)}
-                      className="font-mono text-xs"
-                    />
-                    <Button onClick={saveServers}>Lưu servers</Button>
-                    <p className="text-xs text-muted-foreground">
-                      Format: [{"{"}"id","name","pricePerUnit","status":"active","description"{"}"}]
-                    </p>
-                  </>
-                ) : (
-                  <p className="text-muted-foreground text-sm">Chọn dịch vụ để chỉnh servers</p>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+          <AdminServiceServersPanel
+            platforms={servicesData.platforms}
+            selectedService={selectedService}
+            onSelectService={setSelectedService}
+            onSave={saveServers}
+            saving={savingServers}
+          />
         )}
       </main>
     </div>

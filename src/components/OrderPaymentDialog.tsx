@@ -3,7 +3,7 @@ import QRCode from "react-qr-code";
 import { X, Loader2, QrCode, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Order } from "@/types/service";
-import { PaymentQR, ORDER_STATUS_LABELS } from "@/types/order";
+import { PaymentQR, getOrderStatusLabel, getOrderStatusColor, isOrderPaid } from "@/types/order";
 import { formatPrice } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -66,7 +66,7 @@ export function OrderPaymentDialog({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setOrder(data);
-      toast.success("Thanh toán thành công! Đơn hàng đang được xử lý.");
+      toast.success("Thanh toán thành công! Đơn hàng đang chờ admin xử lý.");
       onConfirmed?.();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Thanh toán thất bại");
@@ -77,7 +77,7 @@ export function OrderPaymentDialog({
 
   if (!open || !orderId) return null;
 
-  const isPaid = order?.status !== "ordered";
+  const isPaid = order ? isOrderPaid(order) : false;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -124,11 +124,11 @@ export function OrderPaymentDialog({
             <div className="text-center py-8 space-y-4">
               <CheckCircle className="h-14 w-14 text-green-500 mx-auto" />
               <p className="font-medium">Đã xác nhận thanh toán</p>
-              <Badge className="bg-green-100 text-green-800">
-                {ORDER_STATUS_LABELS[order.status as keyof typeof ORDER_STATUS_LABELS]}
+              <Badge className={getOrderStatusColor(order.status)}>
+                {getOrderStatusLabel(order.status)}
               </Badge>
               <p className="text-sm text-muted-foreground">
-                Đơn hàng đang được xử lý. Bạn sẽ nhận email khi hoàn thành.
+                Đơn hàng đang chờ admin xử lý. Bạn sẽ nhận cập nhật khi hoàn thành.
               </p>
               <Button className="w-full" onClick={onClose}>
                 Đóng

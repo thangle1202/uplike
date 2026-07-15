@@ -3,6 +3,7 @@ import tiktokIcon from "@/components/res/tiktok_icon.png";
 import instagramIcon from "@/components/res/Instagram_icon.png";
 import threadsIcon from "@/components/res/threads-app-icon.png";
 import youtubeIcon from "@/components/res/youtube.png";
+import shopeeIcon from "@/components/res/shopee_icon.png";
 
 const platformIcons: Record<string, string> = {
   facebook: fbIcon,
@@ -10,6 +11,7 @@ const platformIcons: Record<string, string> = {
   instagram: instagramIcon,
   threads: threadsIcon,
   youtube: youtubeIcon,
+  shopee: shopeeIcon,
 };
 
 export function getPlatformIcon(platformId: string): string | undefined {

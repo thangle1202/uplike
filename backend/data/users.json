@@ -14,7 +14,7 @@
       "email": "admin@uplike.com",
       "passwordHash": "8df2a655cd92153a725f072816e2210385075dbdc87ae4846cde2ea0bf98e799",
       "name": "Admin",
-      "walletBalance": 1000000,
+      "walletBalance": 960000,
       "role": "admin",
       "createdAt": "2026-01-01T00:00:00.000Z"
     }

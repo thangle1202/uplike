@@ -3,7 +3,13 @@ import { X, Loader2, Package, ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Order } from "@/types/service";
-import { ORDER_STATUS_COLORS, ORDER_STATUS_LABELS, OrderStatus } from "@/types/order";
+import {
+  getOrderStatusLabel,
+  getOrderStatusColor,
+  normalizeOrderStatus,
+  isAwaitingPayment,
+  OrderStatus,
+} from "@/types/order";
 import { formatPrice } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -13,10 +19,10 @@ type StatusFilter = "all" | OrderStatus;
 
 const STATUS_FILTERS: { id: StatusFilter; label: string }[] = [
   { id: "all", label: "All" },
+  { id: "pending", label: "Pending" },
   { id: "processing", label: "Processing" },
-  { id: "done", label: "Completed" },
+  { id: "completed", label: "Completed" },
   { id: "cancelled", label: "Aborted" },
-  { id: "ordered", label: "Pending" },
 ];
 
 interface OrderHistoryDialogProps {
@@ -63,7 +69,7 @@ export function OrderHistoryDialog({ open, onClose }: OrderHistoryDialogProps) {
       (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
     if (filter === "all") return sorted;
-    return sorted.filter((o) => o.status === filter);
+    return sorted.filter((o) => normalizeOrderStatus(o.status) === filter);
   }, [orders, filter]);
 
   if (!open) return null;
@@ -144,10 +150,8 @@ export function OrderHistoryDialog({ open, onClose }: OrderHistoryDialogProps) {
                         {new Date(order.createdAt).toLocaleString("vi-VN")}
                       </p>
                     </div>
-                    <Badge
-                      className={ORDER_STATUS_COLORS[order.status as OrderStatus]}
-                    >
-                      {ORDER_STATUS_LABELS[order.status as OrderStatus]}
+                    <Badge className={getOrderStatusColor(order.status)}>
+                      {getOrderStatusLabel(order.status)}
                     </Badge>
                   </div>
 
@@ -198,14 +202,14 @@ export function OrderHistoryDialog({ open, onClose }: OrderHistoryDialogProps) {
                         ? "Paid with wallet"
                         : order.paymentMethod === "guest_qr"
                           ? "Paid via QR"
-                          : order.status === "ordered"
+                          : isAwaitingPayment(order)
                             ? "Awaiting payment"
                             : "—"}
                     </div>
                     <p className="font-bold text-violet-600">{formatPrice(order.totalAmount)}</p>
                   </div>
 
-                  {order.status === "ordered" && (
+                  {isAwaitingPayment(order) && (
                     <Button asChild size="sm" variant="outline" className="w-full">
                       <Link to={`/payment/${order.id}`} onClick={onClose}>
                         Pay now

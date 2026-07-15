@@ -3,14 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { Platform } from "@/types/service";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-
-const platformIcons: Record<string, string> = {
-  facebook: "📘",
-  tiktok: "🎵",
-  instagram: "📸",
-  threads: "🧵",
-  youtube: "▶️",
-};
+import { PlatformIcon } from "@/lib/platformIcons";
 
 interface PlatformCardProps {
   platform: Platform;
@@ -23,10 +16,14 @@ export function PlatformCard({ platform }: PlatformCardProps) {
         <CardHeader>
           <div className="flex items-start justify-between">
             <div
-              className="flex h-12 w-12 items-center justify-center rounded-xl text-2xl"
+              className="flex h-12 w-12 items-center justify-center rounded-xl p-2"
               style={{ backgroundColor: `${platform.color}20` }}
             >
-              {platformIcons[platform.id] || "🌐"}
+              <PlatformIcon
+                platformId={platform.id}
+                className="h-full w-full object-contain"
+                alt={platform.name}
+              />
             </div>
             <Badge variant="secondary">{platform.services.length} dịch vụ</Badge>
           </div>

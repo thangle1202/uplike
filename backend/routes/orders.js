@@ -1,10 +1,10 @@
 import express from "express";
 import { readJson, writeJson, vietnamNow, calcOrderTotal } from "../lib/store.js";
 import { optionalAuth, requireAuth, requireAdmin } from "../lib/auth.js";
+import { sendOrderConfirmationEmail } from "../lib/orderEmail.js";
+import { ORDER_STATUSES, isAwaitingPayment } from "../lib/orderStatus.js";
 
 const router = express.Router();
-
-const ORDER_STATUSES = ["ordered", "processing", "done", "cancelled"];
 
 function validateOrderItem(item) {
   if (!item.platformId || !item.serviceId || !item.url) {
@@ -43,7 +43,7 @@ router.post("/", optionalAuth, async (req, res) => {
       items,
       contact: contactValue,
       note: note || "",
-      status: "ordered",
+      status: "pending",
       paymentMethod: null,
       totalAmount,
       paidAt: null,
@@ -55,6 +55,8 @@ router.post("/", optionalAuth, async (req, res) => {
     const orders = await readJson("orders.json", []);
     orders.push(order);
     await writeJson("orders.json", orders);
+
+    sendOrderConfirmationEmail(order);
 
     res.status(201).json(order);
   } catch (error) {
@@ -116,4 +118,5 @@ router.patch("/:orderId/status", requireAdmin, async (req, res) => {
   }
 });
 
+export { isAwaitingPayment };
 export default router;

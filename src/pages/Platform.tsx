@@ -7,6 +7,7 @@ import { ServiceCard } from "@/components/ServiceCard";
 import { OrderFormModal } from "@/components/OrderFormModal";
 import { Platform, Service } from "@/types/service";
 import { Button } from "@/components/ui/button";
+import { PlatformIcon } from "@/lib/platformIcons";
 
 export default function PlatformPage() {
   const { platformId } = useParams<{ platformId: string }>();
@@ -75,14 +76,14 @@ export default function PlatformPage() {
         <div className="mb-10">
           <div className="flex items-center gap-4 mb-2">
             <div
-              className="h-14 w-14 rounded-xl flex items-center justify-center text-3xl"
+              className="h-14 w-14 rounded-xl flex items-center justify-center p-2.5"
               style={{ backgroundColor: `${platform.color}20` }}
             >
-              {platform.id === "facebook" && "📘"}
-              {platform.id === "tiktok" && "🎵"}
-              {platform.id === "instagram" && "📸"}
-              {platform.id === "threads" && "🧵"}
-              {platform.id === "youtube" && "▶️"}
+              <PlatformIcon
+                platformId={platform.id}
+                className="h-full w-full object-contain"
+                alt={platform.name}
+              />
             </div>
             <div>
               <h1 className="text-3xl font-bold">{platform.name}</h1>
