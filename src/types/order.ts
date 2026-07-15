@@ -19,7 +19,7 @@ export interface User {
   email: string;
   name: string;
   walletBalance: number;
-  role: string;
+  role: "user" | "admin";
   createdAt: string;
 }
 
@@ -33,6 +33,32 @@ export interface Deposit {
   status: "pending" | "approved" | "rejected";
   createdAt: string;
   processedAt?: string;
+}
+
+export interface AdminStats {
+  orders: {
+    total: number;
+    ordered: number;
+    processing: number;
+    done: number;
+    cancelled: number;
+  };
+  revenue: {
+    total: number;
+    today: number;
+    month: number;
+    wallet: number;
+    guest: number;
+  };
+  users: {
+    total: number;
+    admins: number;
+  };
+  deposits: {
+    pending: number;
+    pendingAmount: number;
+    approvedTotal: number;
+  };
 }
 
 export interface PaymentQR {

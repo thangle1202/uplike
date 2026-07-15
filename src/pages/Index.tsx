@@ -41,7 +41,7 @@ export default function Index() {
   if (loading) {
     return (
       <div className="flex h-screen mesh-bg">
-        <div className="w-[280px] sidebar-gradient animate-pulse" />
+        <div className="w-[320px] sidebar-gradient animate-pulse" />
         <div className="flex-1 p-8 space-y-5">
           <div className="h-6 w-48 bg-white/60 rounded-xl animate-pulse" />
           <div className="h-10 w-72 bg-white/60 rounded-xl animate-pulse" />

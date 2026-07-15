@@ -27,9 +27,7 @@ router.post("/", optionalAuth, async (req, res) => {
       return res.status(400).json({ error: "Order must contain at least one item" });
     }
 
-    if (!contact || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact)) {
-      return res.status(400).json({ error: "Valid email contact is required" });
-    }
+    const contactValue = req.user?.email || (typeof contact === "string" && contact.trim()) || "Khách";
 
     for (const item of items) {
       const error = validateOrderItem(item);
@@ -43,7 +41,7 @@ router.post("/", optionalAuth, async (req, res) => {
       id: Date.now().toString(),
       userId: req.user?.id || null,
       items,
-      contact,
+      contact: contactValue,
       note: note || "",
       status: "ordered",
       paymentMethod: null,

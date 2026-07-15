@@ -67,7 +67,6 @@ export function ServiceDetailPanel({ platform, service }: ServiceDetailPanelProp
   const servers = getServiceServers(service);
 
   const [url, setUrl] = useState("");
-  const [contact, setContact] = useState("");
   const [quantity, setQuantity] = useState(String(service.minQuantity));
   const [commentText, setCommentText] = useState("");
   const [selectedServerId, setSelectedServerId] = useState(servers[0]?.id ?? "");
@@ -79,10 +78,9 @@ export function ServiceDetailPanel({ platform, service }: ServiceDetailPanelProp
     setUrl("");
     setQuantity(String(service.minQuantity));
     setCommentText("");
-    setContact(user?.email || "");
     const nextServers = getServiceServers(service);
     setSelectedServerId(nextServers[0]?.id ?? "");
-  }, [service.id, platform.id, user?.email]);
+  }, [service.id, platform.id]);
 
   const selectedServer = servers.find((s) => s.id === selectedServerId) ?? servers[0];
   const validComments = parseCommentsFromText(commentText);
@@ -93,19 +91,13 @@ export function ServiceDetailPanel({ platform, service }: ServiceDetailPanelProp
 
   const handleCommentTextChange = (value: string) => {
     setCommentText(value);
-    if (service.requiresComments) {
-      setQuantity(String(parseCommentsFromText(value).length));
-    }
   };
+
+  const showBuyBar = service.requiresComments || qty > 0;
 
   const handleBuy = async () => {
     if (!url.trim()) {
       toast.error("Vui lòng nhập link cần buff");
-      return;
-    }
-    const email = isAuthenticated ? user!.email : contact.trim();
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      toast.error("Vui lòng nhập email hợp lệ");
       return;
     }
     if (service.requiresComments && validComments.length === 0) {
@@ -148,7 +140,7 @@ export function ServiceDetailPanel({ platform, service }: ServiceDetailPanelProp
               unit: service.unit,
             },
           ],
-          contact: email,
+          contact: user?.email ?? "Khách",
         }),
       });
 
@@ -227,19 +219,6 @@ export function ServiceDetailPanel({ platform, service }: ServiceDetailPanelProp
             </div>
 
             <SectionCard icon={Link2} title="Link cần buff">
-              {!isAuthenticated && (
-                <div className="space-y-2 mb-4">
-                  <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                    Email liên hệ
-                  </Label>
-                  <Input
-                    type="email"
-                    placeholder="email@example.com"
-                    value={contact}
-                    onChange={(e) => setContact(e.target.value)}
-                  />
-                </div>
-              )}
               <div className="space-y-2">
                 <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                   URL
@@ -252,20 +231,21 @@ export function ServiceDetailPanel({ platform, service }: ServiceDetailPanelProp
               </div>
             </SectionCard>
 
-            <SectionCard icon={Hash} title="Số lượng">
-              <Input
-                type="number"
-                min={service.minQuantity}
-                max={service.maxQuantity}
-                value={service.requiresComments ? qty : quantity}
-                onChange={(e) => !service.requiresComments && setQuantity(e.target.value)}
-                readOnly={service.requiresComments}
-                className={cn("max-w-xs", service.requiresComments && "opacity-70")}
-              />
-              <p className="text-xs text-muted-foreground mt-2">
-                Min {service.minQuantity.toLocaleString()} — Max {service.maxQuantity.toLocaleString()} {service.unit}
-              </p>
-            </SectionCard>
+            {!service.requiresComments && (
+              <SectionCard icon={Hash} title="Số lượng">
+                <Input
+                  type="number"
+                  min={service.minQuantity}
+                  max={service.maxQuantity}
+                  value={quantity}
+                  onChange={(e) => setQuantity(e.target.value)}
+                  className="max-w-xs"
+                />
+                <p className="text-xs text-muted-foreground mt-2">
+                  Min {service.minQuantity.toLocaleString()} — Max {service.maxQuantity.toLocaleString()} {service.unit}
+                </p>
+              </SectionCard>
+            )}
 
             <SectionCard icon={Server} title={`Chọn server (${servers.length})`}>
               <div
@@ -340,7 +320,9 @@ export function ServiceDetailPanel({ platform, service }: ServiceDetailPanelProp
             {service.requiresComments && (
               <SectionCard icon={MessageSquare} title="Danh sách comment">
                 <p className="text-xs text-muted-foreground mb-3">
-                  Mỗi comment trên một dòng — số lượng tự động tính
+                  Mỗi comment trên một dòng — số lượng tự động tính (Min{" "}
+                  {service.minQuantity.toLocaleString()} — Max {service.maxQuantity.toLocaleString()}{" "}
+                  {service.unit})
                 </p>
                 <Textarea
                   placeholder={"Comment 1\nComment 2\nComment 3"}
@@ -361,18 +343,33 @@ export function ServiceDetailPanel({ platform, service }: ServiceDetailPanelProp
       </div>
 
       {/* Sticky buy bar */}
-      {qty > 0 && (
+      {showBuyBar && (
         <div className="sticky bottom-0 z-30 border-t border-border/50 bg-white/80 backdrop-blur-xl px-8 py-4 flex items-center justify-between gap-4 shadow-[0_-4px_24px_-8px_rgb(0_0_0/0.08)]">
           <div className="flex-1 min-w-0">
             <p className="text-xs text-muted-foreground font-medium">Tổng thanh toán</p>
-            <p className="text-2xl font-bold gradient-text">{formatPrice(totalPrice)}</p>
-            {isAuthenticated && user && user.walletBalance >= totalPrice && (
+            <p className="text-2xl font-bold gradient-text">
+              {service.requiresComments && validComments.length === 0
+                ? "—"
+                : formatPrice(totalPrice)}
+            </p>
+            {service.requiresComments && validComments.length === 0 ? (
+              <p className="text-xs text-muted-foreground mt-0.5">Nhập comment để tính giá</p>
+            ) : isAuthenticated && user && user.walletBalance >= totalPrice ? (
               <p className="text-xs text-emerald-600 font-medium flex items-center gap-1 mt-0.5">
                 <Zap className="h-3 w-3" /> Thanh toán bằng ví
               </p>
-            )}
+            ) : service.requiresComments && validComments.length > 0 ? (
+              <p className="text-xs text-violet-600 font-medium mt-0.5">
+                {validComments.length} comment
+              </p>
+            ) : null}
           </div>
-          <Button size="lg" className="min-w-[160px]" onClick={handleBuy} disabled={submitting}>
+          <Button
+            size="lg"
+            className="min-w-[160px]"
+            onClick={handleBuy}
+            disabled={submitting || (service.requiresComments && validComments.length === 0)}
+          >
             {submitting ? "Đang xử lý..." : "Mua ngay"}
           </Button>
         </div>

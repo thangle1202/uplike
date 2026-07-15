@@ -14,6 +14,7 @@ import {
   History,
   Plus,
   Home,
+  Shield,
 } from "lucide-react";
 import { useState } from "react";
 import { Platform, getServiceIcon } from "@/types/service";
@@ -42,7 +43,7 @@ const serviceIcons = {
 
 export function ServiceSidebar({ platforms, activePlatformId, activeServiceId }: ServiceSidebarProps) {
   const navigate = useNavigate();
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, isAdmin, logout } = useAuth();
   const [loginOpen, setLoginOpen] = useState(false);
   const [depositOpen, setDepositOpen] = useState(false);
   const [orderHistoryOpen, setOrderHistoryOpen] = useState(false);
@@ -56,7 +57,7 @@ export function ServiceSidebar({ platforms, activePlatformId, activeServiceId }:
 
   return (
     <>
-      <aside className="w-[280px] shrink-0 sidebar-gradient text-white flex flex-col h-screen sticky top-0 border-r border-white/5">
+      <aside className="w-[320px] shrink-0 sidebar-gradient text-white flex flex-col h-screen sticky top-0 border-r border-white/5 overflow-x-hidden">
         <div className="p-5">
           <div className="flex items-center justify-between mb-5">
             <button
@@ -98,7 +99,7 @@ export function ServiceSidebar({ platforms, activePlatformId, activeServiceId }:
               <div className="flex items-center justify-between">
                 <span className="text-xs text-white/50">Tài khoản</span>
                 <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-violet-500/30 text-violet-100 border border-violet-300/30">
-                  Member
+                  {isAdmin ? "Admin" : "Member"}
                 </span>
               </div>
               <div>
@@ -125,13 +126,13 @@ export function ServiceSidebar({ platforms, activePlatformId, activeServiceId }:
           </div>
         </div>
 
-        <nav className="flex-1 overflow-y-auto pb-4 scrollbar-thin">
-          <div className="px-3 mb-2">
+        <nav className="flex-1 overflow-y-auto overflow-x-hidden pb-4 scrollbar-thin">
+          <div className="px-4 mb-2">
             <button
               type="button"
               onClick={() => navigate("/")}
               className={cn(
-                "flex items-center gap-3 w-full mx-3 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200",
+                "flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200",
                 !activePlatformId && !activeServiceId
                   ? "bg-white/10 text-white shadow-sm"
                   : "text-white/55 hover:text-white hover:bg-white/5"
@@ -143,12 +144,12 @@ export function ServiceSidebar({ platforms, activePlatformId, activeServiceId }:
           </div>
 
           {isAuthenticated && (
-            <div className="px-3 mb-2">
+            <div className="px-4 mb-2">
               <button
                 type="button"
                 onClick={() => setOrderHistoryOpen(true)}
                 className={cn(
-                  "flex items-center gap-3 w-full mx-3 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200",
+                  "flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200",
                   "text-white/55 hover:text-white hover:bg-white/5"
                 )}
               >
@@ -158,7 +159,23 @@ export function ServiceSidebar({ platforms, activePlatformId, activeServiceId }:
             </div>
           )}
 
-          <div className="px-5 pt-4 pb-2 flex items-center gap-2">
+          {isAdmin && (
+            <div className="px-4 mb-2">
+              <button
+                type="button"
+                onClick={() => navigate("/admin")}
+                className={cn(
+                  "flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200",
+                  "text-violet-200 hover:text-white hover:bg-violet-500/20 border border-violet-400/20"
+                )}
+              >
+                <Shield className="h-4 w-4" />
+                Admin Panel
+              </button>
+            </div>
+          )}
+
+          <div className="px-4 pt-4 pb-2 flex items-center gap-2">
             <Sparkles className="h-3.5 w-3.5 text-violet-400" />
             <span className="text-[10px] font-bold tracking-widest text-white/35 uppercase">Dịch vụ</span>
           </div>
@@ -168,11 +185,11 @@ export function ServiceSidebar({ platforms, activePlatformId, activeServiceId }:
             const isActivePlatform = platform.id === activePlatformId;
 
             return (
-              <div key={platform.id} className="mb-1">
+              <div key={platform.id} className="mb-1 px-4">
                 <button
                   onClick={() => setExpanded((prev) => ({ ...prev, [platform.id]: !prev[platform.id] }))}
                   className={cn(
-                    "w-full flex items-center gap-2.5 mx-3 px-3 py-2.5 rounded-xl text-left text-[13px] font-semibold transition-all",
+                    "w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left text-[13px] font-semibold transition-all min-w-0",
                     isActivePlatform
                       ? "text-violet-200 bg-violet-500/10"
                       : "text-white/70 hover:text-white hover:bg-white/5"
@@ -188,7 +205,7 @@ export function ServiceSidebar({ platforms, activePlatformId, activeServiceId }:
                 </button>
 
                 {isExpanded && (
-                  <div className="mt-0.5 ml-3 mr-3 pl-3 border-l border-white/10 space-y-0.5">
+                  <div className="mt-0.5 ml-2 pl-3 border-l border-white/10 space-y-0.5 min-w-0">
                     {platform.services.map((service) => {
                       const iconKey = getServiceIcon(service.id);
                       const Icon = serviceIcons[iconKey] || serviceIcons.default;
@@ -200,7 +217,7 @@ export function ServiceSidebar({ platforms, activePlatformId, activeServiceId }:
                           key={service.id}
                           onClick={() => navigate(`/${platform.id}/${service.id}`)}
                           className={cn(
-                            "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left text-[12px] transition-all duration-200",
+                            "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left text-[12px] transition-all duration-200 min-w-0",
                             isActive
                               ? "bg-white text-slate-900 font-semibold shadow-soft"
                               : "text-white/50 hover:text-white hover:bg-white/5"

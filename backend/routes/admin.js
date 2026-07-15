@@ -2,10 +2,9 @@ import express from "express";
 import { promises as fs } from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { readJson, writeJson } from "../lib/store.js";
+import { readJson, writeJson, vietnamNow } from "../lib/store.js";
 import {
   requireAdmin,
-  ADMIN_PASSCODE,
   getUsersData,
   saveUsers,
   sanitizeUser,
@@ -16,12 +15,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const servicesPath = path.join(__dirname, "../data/services.json");
 
-router.post("/verify", (req, res) => {
-  const { passcode } = req.body || {};
-  if (passcode === ADMIN_PASSCODE) {
-    return res.json({ ok: true });
-  }
-  return res.status(401).json({ ok: false, error: "Invalid passcode" });
+router.get("/me", requireAdmin, (req, res) => {
+  res.json({ ok: true, user: sanitizeUser(req.user) });
 });
 
 router.get("/orders", requireAdmin, async (_req, res) => {
@@ -48,6 +43,29 @@ router.patch("/users/:id/wallet", requireAdmin, async (req, res) => {
     res.json(sanitizeUser(users[index]));
   } catch (error) {
     res.status(500).json({ error: "Failed to update wallet" });
+  }
+});
+
+router.patch("/users/:id/role", requireAdmin, async (req, res) => {
+  try {
+    const { role } = req.body;
+    if (!["user", "admin"].includes(role)) {
+      return res.status(400).json({ error: "Role must be user or admin" });
+    }
+    const users = await getUsersData();
+    const index = users.findIndex((u) => u.id === req.params.id);
+    if (index === -1) return res.status(404).json({ error: "User not found" });
+
+    const adminCount = users.filter((u) => u.role === "admin").length;
+    if (users[index].role === "admin" && role === "user" && adminCount <= 1) {
+      return res.status(400).json({ error: "Cannot remove the last admin" });
+    }
+
+    users[index].role = role;
+    await saveUsers(users);
+    res.json(sanitizeUser(users[index]));
+  } catch (error) {
+    res.status(500).json({ error: "Failed to update role" });
   }
 });
 
@@ -86,10 +104,47 @@ router.patch("/services/:platformId/:serviceId/servers", requireAdmin, async (re
   }
 });
 
+function isPaidOrder(order) {
+  return order.status === "processing" || order.status === "done";
+}
+
+function startOfDayVN(date) {
+  const d = new Date(date.toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh" }));
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
 router.get("/stats", requireAdmin, async (_req, res) => {
   const orders = await readJson("orders.json", []);
   const users = await getUsersData();
   const deposits = await readJson("deposits.json", []);
+
+  const paidOrders = orders.filter(isPaidOrder);
+  const totalRevenue = paidOrders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+
+  const now = vietnamNow();
+  const todayStart = startOfDayVN(now);
+  const monthStart = new Date(todayStart);
+  monthStart.setDate(1);
+
+  const revenueToday = paidOrders
+    .filter((o) => new Date(o.paidAt || o.createdAt) >= todayStart)
+    .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+
+  const revenueMonth = paidOrders
+    .filter((o) => new Date(o.paidAt || o.createdAt) >= monthStart)
+    .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+
+  const walletRevenue = paidOrders
+    .filter((o) => o.paymentMethod === "wallet")
+    .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+
+  const guestRevenue = paidOrders
+    .filter((o) => o.paymentMethod === "guest_qr")
+    .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+
+  const approvedDeposits = deposits.filter((d) => d.status === "approved");
+  const pendingDeposits = deposits.filter((d) => d.status === "pending");
 
   res.json({
     orders: {
@@ -99,8 +154,22 @@ router.get("/stats", requireAdmin, async (_req, res) => {
       done: orders.filter((o) => o.status === "done").length,
       cancelled: orders.filter((o) => o.status === "cancelled").length,
     },
-    users: users.length,
-    pendingDeposits: deposits.filter((d) => d.status === "pending").length,
+    revenue: {
+      total: totalRevenue,
+      today: revenueToday,
+      month: revenueMonth,
+      wallet: walletRevenue,
+      guest: guestRevenue,
+    },
+    users: {
+      total: users.length,
+      admins: users.filter((u) => u.role === "admin").length,
+    },
+    deposits: {
+      pending: pendingDeposits.length,
+      pendingAmount: pendingDeposits.reduce((sum, d) => sum + (d.amount || 0), 0),
+      approvedTotal: approvedDeposits.reduce((sum, d) => sum + (d.amount || 0), 0),
+    },
   });
 });
 

@@ -8,6 +8,7 @@ import WalletPage from "@/pages/Wallet";
 import OrdersPage from "@/pages/Orders";
 import Admin from "@/pages/Admin";
 import NotFound from "@/pages/NotFound";
+import { AdminRoute } from "@/components/AdminRoute";
 
 const queryClient = new QueryClient();
 
@@ -22,7 +23,7 @@ const App = () => (
           <Route path="/payment/:orderId" element={<Payment />} />
           <Route path="/wallet" element={<WalletPage />} />
           <Route path="/orders" element={<OrdersPage />} />
-          <Route path="/admin" element={<Admin />} />
+          <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

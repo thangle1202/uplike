@@ -81,12 +81,21 @@ export async function requireAuth(req, res, next) {
   });
 }
 
-export const ADMIN_PASSCODE = process.env.ADMIN_PASSCODE || "admin123";
+export async function requireAdmin(req, res, next) {
+  const authHeader = req.headers.authorization || "";
+  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
+  const userId = getUserIdFromToken(token);
 
-export function requireAdmin(req, res, next) {
-  const passcode = req.header("X-Admin-Passcode");
-  if (!passcode || passcode !== ADMIN_PASSCODE) {
-    return res.status(401).json({ error: "Invalid or missing admin passcode" });
+  if (!userId) {
+    return res.status(401).json({ error: "Authentication required" });
   }
+
+  const user = await findUserById(userId);
+  if (!user || user.role !== "admin") {
+    return res.status(403).json({ error: "Admin access required" });
+  }
+
+  req.userId = userId;
+  req.user = user;
   next();
 }
