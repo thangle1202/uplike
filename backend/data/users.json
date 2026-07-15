@@ -1,0 +1,22 @@
+{
+  "users": [
+    {
+      "id": "user-demo-1",
+      "email": "demo@uplike.com",
+      "passwordHash": "c55edc11c6728ee1dcdfd51f689796abd2d026f972b8334b8bc7048415e9b7b5",
+      "name": "Demo User",
+      "walletBalance": 500000,
+      "role": "user",
+      "createdAt": "2026-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "user-admin-1",
+      "email": "admin@uplike.com",
+      "passwordHash": "8df2a655cd92153a725f072816e2210385075dbdc87ae4846cde2ea0bf98e799",
+      "name": "Admin",
+      "walletBalance": 1000000,
+      "role": "admin",
+      "createdAt": "2026-01-01T00:00:00.000Z"
+    }
+  ]
+}

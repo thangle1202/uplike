@@ -1,0 +1,8 @@
+node_modules
+dist
+.env
+.DS_Store
+*.log
+
+# Runtime data (seed files in backend/data/ are committed)
+backend/data/sessions.json

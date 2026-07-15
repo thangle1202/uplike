@@ -1,0 +1,317 @@
+{
+  "platforms": [
+    {
+      "id": "facebook",
+      "name": "Facebook",
+      "color": "#1877F2",
+      "description": "Tăng tương tác cho Fanpage, bài viết và video trên Facebook",
+      "services": [
+        {
+          "id": "page_likes",
+          "name": "Tăng like Fanpage",
+          "description": "Tăng lượt thích cho trang Fanpage Facebook",
+          "requiresUrl": true,
+          "requiresComments": false,
+          "urlLabel": "URL Fanpage",
+          "urlPlaceholder": "https://facebook.com/your-page",
+          "pricePerUnit": 50,
+          "minQuantity": 100,
+          "maxQuantity": 50000,
+          "unit": "like"
+        },
+        {
+          "id": "page_followers",
+          "name": "Tăng follow Fanpage",
+          "description": "Tăng lượt theo dõi cho trang Fanpage",
+          "requiresUrl": true,
+          "requiresComments": false,
+          "urlLabel": "URL Fanpage",
+          "urlPlaceholder": "https://facebook.com/your-page",
+          "pricePerUnit": 80,
+          "minQuantity": 100,
+          "maxQuantity": 20000,
+          "unit": "follow"
+        },
+        {
+          "id": "user_followers",
+          "name": "Tăng follow User",
+          "description": "Tăng lượt theo dõi cho tài khoản cá nhân",
+          "requiresUrl": true,
+          "requiresComments": false,
+          "urlLabel": "URL Profile",
+          "urlPlaceholder": "https://facebook.com/username",
+          "pricePerUnit": 100,
+          "minQuantity": 100,
+          "maxQuantity": 10000,
+          "unit": "follow"
+        },
+        {
+          "id": "post_likes",
+          "name": "Tăng like bài viết",
+          "description": "Tăng lượt thích cho bài đăng",
+          "requiresUrl": true,
+          "requiresComments": false,
+          "urlLabel": "URL bài viết",
+          "urlPlaceholder": "https://facebook.com/.../posts/...",
+          "pricePerUnit": 30,
+          "minQuantity": 50,
+          "maxQuantity": 100000,
+          "unit": "like"
+        },
+        {
+          "id": "post_comments",
+          "name": "Tăng comment bài viết",
+          "description": "Tăng bình luận cho bài đăng với nội dung tùy chỉnh",
+          "requiresUrl": true,
+          "requiresComments": true,
+          "urlLabel": "URL bài viết",
+          "urlPlaceholder": "https://facebook.com/.../posts/...",
+          "pricePerUnit": 200,
+          "minQuantity": 10,
+          "maxQuantity": 5000,
+          "unit": "comment"
+        },
+        {
+          "id": "video_views",
+          "name": "Tăng view video",
+          "description": "Tăng lượt xem cho video trên Facebook",
+          "requiresUrl": true,
+          "requiresComments": false,
+          "urlLabel": "URL video",
+          "urlPlaceholder": "https://facebook.com/.../videos/...",
+          "pricePerUnit": 10,
+          "minQuantity": 1000,
+          "maxQuantity": 1000000,
+          "unit": "view"
+        }
+      ]
+    },
+    {
+      "id": "tiktok",
+      "name": "TikTok",
+      "color": "#FE2C55",
+      "description": "Tăng follow, like, comment và view cho TikTok",
+      "services": [
+        {
+          "id": "user_followers",
+          "name": "Tăng follow",
+          "description": "Tăng người theo dõi tài khoản TikTok",
+          "requiresUrl": true,
+          "requiresComments": false,
+          "urlLabel": "URL Profile TikTok",
+          "urlPlaceholder": "https://tiktok.com/@username",
+          "pricePerUnit": 120,
+          "minQuantity": 100,
+          "maxQuantity": 50000,
+          "unit": "follow"
+        },
+        {
+          "id": "post_likes",
+          "name": "Tăng like video",
+          "description": "Tăng lượt thích cho video TikTok",
+          "requiresUrl": true,
+          "requiresComments": false,
+          "urlLabel": "URL video",
+          "urlPlaceholder": "https://tiktok.com/@user/video/...",
+          "pricePerUnit": 40,
+          "minQuantity": 100,
+          "maxQuantity": 100000,
+          "unit": "like"
+        },
+        {
+          "id": "post_comments",
+          "name": "Tăng comment video",
+          "description": "Tăng bình luận cho video với nội dung tùy chỉnh",
+          "requiresUrl": true,
+          "requiresComments": true,
+          "urlLabel": "URL video",
+          "urlPlaceholder": "https://tiktok.com/@user/video/...",
+          "pricePerUnit": 250,
+          "minQuantity": 10,
+          "maxQuantity": 5000,
+          "unit": "comment"
+        },
+        {
+          "id": "video_views",
+          "name": "Tăng view video",
+          "description": "Tăng lượt xem cho video TikTok",
+          "requiresUrl": true,
+          "requiresComments": false,
+          "urlLabel": "URL video",
+          "urlPlaceholder": "https://tiktok.com/@user/video/...",
+          "pricePerUnit": 5,
+          "minQuantity": 1000,
+          "maxQuantity": 10000000,
+          "unit": "view"
+        }
+      ]
+    },
+    {
+      "id": "instagram",
+      "name": "Instagram",
+      "color": "#E4405F",
+      "description": "Tăng follow, like, comment và view cho Instagram",
+      "services": [
+        {
+          "id": "user_followers",
+          "name": "Tăng follow",
+          "description": "Tăng người theo dõi tài khoản Instagram",
+          "requiresUrl": true,
+          "requiresComments": false,
+          "urlLabel": "URL Profile Instagram",
+          "urlPlaceholder": "https://instagram.com/username",
+          "pricePerUnit": 150,
+          "minQuantity": 100,
+          "maxQuantity": 30000,
+          "unit": "follow"
+        },
+        {
+          "id": "post_likes",
+          "name": "Tăng like bài viết",
+          "description": "Tăng lượt thích cho bài đăng hoặc Reels",
+          "requiresUrl": true,
+          "requiresComments": false,
+          "urlLabel": "URL bài viết",
+          "urlPlaceholder": "https://instagram.com/p/...",
+          "pricePerUnit": 60,
+          "minQuantity": 50,
+          "maxQuantity": 50000,
+          "unit": "like"
+        },
+        {
+          "id": "post_comments",
+          "name": "Tăng comment bài viết",
+          "description": "Tăng bình luận cho bài đăng với nội dung tùy chỉnh",
+          "requiresUrl": true,
+          "requiresComments": true,
+          "urlLabel": "URL bài viết",
+          "urlPlaceholder": "https://instagram.com/p/...",
+          "pricePerUnit": 300,
+          "minQuantity": 10,
+          "maxQuantity": 3000,
+          "unit": "comment"
+        },
+        {
+          "id": "video_views",
+          "name": "Tăng view Reels",
+          "description": "Tăng lượt xem cho Reels Instagram",
+          "requiresUrl": true,
+          "requiresComments": false,
+          "urlLabel": "URL Reels",
+          "urlPlaceholder": "https://instagram.com/reel/...",
+          "pricePerUnit": 8,
+          "minQuantity": 1000,
+          "maxQuantity": 5000000,
+          "unit": "view"
+        }
+      ]
+    },
+    {
+      "id": "threads",
+      "name": "Threads",
+      "color": "#000000",
+      "description": "Tăng follow, like và comment cho Threads",
+      "services": [
+        {
+          "id": "user_followers",
+          "name": "Tăng follow",
+          "description": "Tăng người theo dõi tài khoản Threads",
+          "requiresUrl": true,
+          "requiresComments": false,
+          "urlLabel": "URL Profile Threads",
+          "urlPlaceholder": "https://threads.net/@username",
+          "pricePerUnit": 130,
+          "minQuantity": 100,
+          "maxQuantity": 20000,
+          "unit": "follow"
+        },
+        {
+          "id": "post_likes",
+          "name": "Tăng like bài viết",
+          "description": "Tăng lượt thích cho bài đăng Threads",
+          "requiresUrl": true,
+          "requiresComments": false,
+          "urlLabel": "URL bài viết",
+          "urlPlaceholder": "https://threads.net/@user/post/...",
+          "pricePerUnit": 50,
+          "minQuantity": 50,
+          "maxQuantity": 30000,
+          "unit": "like"
+        },
+        {
+          "id": "post_comments",
+          "name": "Tăng comment bài viết",
+          "description": "Tăng bình luận cho bài đăng với nội dung tùy chỉnh",
+          "requiresUrl": true,
+          "requiresComments": true,
+          "urlLabel": "URL bài viết",
+          "urlPlaceholder": "https://threads.net/@user/post/...",
+          "pricePerUnit": 280,
+          "minQuantity": 10,
+          "maxQuantity": 2000,
+          "unit": "comment"
+        }
+      ]
+    },
+    {
+      "id": "youtube",
+      "name": "YouTube",
+      "color": "#FF0000",
+      "description": "Tăng subscriber, like, comment và view cho YouTube",
+      "services": [
+        {
+          "id": "user_followers",
+          "name": "Tăng subscriber",
+          "description": "Tăng người đăng ký kênh YouTube",
+          "requiresUrl": true,
+          "requiresComments": false,
+          "urlLabel": "URL kênh YouTube",
+          "urlPlaceholder": "https://youtube.com/@channel",
+          "pricePerUnit": 500,
+          "minQuantity": 100,
+          "maxQuantity": 10000,
+          "unit": "subscriber"
+        },
+        {
+          "id": "post_likes",
+          "name": "Tăng like video",
+          "description": "Tăng lượt thích cho video YouTube",
+          "requiresUrl": true,
+          "requiresComments": false,
+          "urlLabel": "URL video",
+          "urlPlaceholder": "https://youtube.com/watch?v=...",
+          "pricePerUnit": 80,
+          "minQuantity": 50,
+          "maxQuantity": 50000,
+          "unit": "like"
+        },
+        {
+          "id": "post_comments",
+          "name": "Tăng comment video",
+          "description": "Tăng bình luận cho video với nội dung tùy chỉnh",
+          "requiresUrl": true,
+          "requiresComments": true,
+          "urlLabel": "URL video",
+          "urlPlaceholder": "https://youtube.com/watch?v=...",
+          "pricePerUnit": 350,
+          "minQuantity": 10,
+          "maxQuantity": 2000,
+          "unit": "comment"
+        },
+        {
+          "id": "video_views",
+          "name": "Tăng view video",
+          "description": "Tăng lượt xem cho video YouTube",
+          "requiresUrl": true,
+          "requiresComments": false,
+          "urlLabel": "URL video",
+          "urlPlaceholder": "https://youtube.com/watch?v=...",
+          "pricePerUnit": 15,
+          "minQuantity": 1000,
+          "maxQuantity": 10000000,
+          "unit": "view"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "bankName": "Vietcombank",
+  "accountNumber": "1023456789",
+  "accountName": "UPLIKE ADMIN",
+  "transferNotePrefix": "UPLIKE",
+  "qrPayloadTemplate": "UPLIKE|BANK:VCB|ACC:1023456789|NAME:UPLIKE ADMIN",
+  "landing": {
+    "customers": "12,000+",
+    "ordersDelivered": "850,000+",
+    "satisfactionRate": "98%",
+    "supportHours": "24/7",
+    "tagline": "Tăng tương tác mạng xã hội nhanh chóng, an toàn và uy tín",
+    "highlights": [
+      "Tốc độ xử lý nhanh, nhiều server lựa chọn",
+      "Thanh toán QR & ví điện tử tiện lợi",
+      "Hỗ trợ Facebook, TikTok, Instagram, Threads, YouTube"
+    ]
+  }
+}
