@@ -20,6 +20,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { PlatformIcon } from "@/lib/platformIcons";
 import { OrderPaymentDialog } from "@/components/OrderPaymentDialog";
+import { ContactButtons } from "@/components/ContactFloat";
 
 interface ServiceDetailPanelProps {
   platform: Platform;
@@ -185,17 +186,26 @@ export function ServiceDetailPanel({ platform, service }: ServiceDetailPanelProp
       {/* Header */}
       <div className="sticky top-0 z-10 backdrop-blur-xl bg-background/70 border-b border-border/50 px-8 py-5">
         <div className="flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">
-              <span className="gradient-text">{service.name}</span>
-            </h1>
-            <p className="text-sm text-muted-foreground mt-1">{service.description}</p>
+          <div className="flex items-start gap-3 min-w-0">
+            <div
+              className="h-11 w-11 rounded-2xl flex items-center justify-center shrink-0 shadow-soft overflow-hidden p-2"
+              style={{ backgroundColor: `${platform.color}12` }}
+            >
+              <PlatformIcon
+                platformId={platform.id}
+                className="h-full w-full object-contain"
+                alt={platform.name}
+              />
+            </div>
+            <div className="min-w-0">
+              <h1 className="text-2xl font-bold tracking-tight">
+                <span className="gradient-text">{service.name}</span>
+              </h1>
+              <p className="text-sm text-muted-foreground mt-1">{service.description}</p>
+            </div>
           </div>
-          <div
-            className="hidden sm:flex h-12 w-12 rounded-2xl items-center justify-center shrink-0 shadow-soft overflow-hidden p-2"
-            style={{ backgroundColor: `${platform.color}12` }}
-          >
-            <PlatformIcon platformId={platform.id} className="h-full w-full object-contain" alt={platform.name} />
+          <div className="flex items-center gap-2 shrink-0">
+            <ContactButtons key={service.id} layout="header" />
           </div>
         </div>
       </div>
@@ -352,7 +362,7 @@ export function ServiceDetailPanel({ platform, service }: ServiceDetailPanelProp
 
       {/* Sticky buy bar */}
       {qty > 0 && (
-        <div className="sticky bottom-0 border-t border-border/50 bg-white/80 backdrop-blur-xl px-8 py-4 flex items-center justify-between gap-4 shadow-[0_-4px_24px_-8px_rgb(0_0_0/0.08)]">
+        <div className="sticky bottom-0 z-30 border-t border-border/50 bg-white/80 backdrop-blur-xl px-8 py-4 flex items-center justify-between gap-4 shadow-[0_-4px_24px_-8px_rgb(0_0_0/0.08)]">
           <div className="flex-1 min-w-0">
             <p className="text-xs text-muted-foreground font-medium">Tổng thanh toán</p>
             <p className="text-2xl font-bold gradient-text">{formatPrice(totalPrice)}</p>

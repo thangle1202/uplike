@@ -69,6 +69,10 @@ export default {
           from: { opacity: "0", transform: "translateX(1.5rem) scale(0.85)" },
           to: { opacity: "1", transform: "translateX(0) scale(1)" },
         },
+        "contact-header-enter": {
+          from: { opacity: "0", transform: "translateY(-10px) scale(0.8)" },
+          to: { opacity: "1", transform: "translateY(0) scale(1)" },
+        },
         "contact-pulse": {
           "0%, 100%": { transform: "scale(1)" },
           "50%": { transform: "scale(1.06)" },
@@ -76,6 +80,10 @@ export default {
         "contact-ring": {
           "0%": { transform: "scale(1)", opacity: "0.5" },
           "100%": { transform: "scale(1.55)", opacity: "0" },
+        },
+        "contact-ring-sm": {
+          "0%": { transform: "scale(1)", opacity: "0.45" },
+          "100%": { transform: "scale(1.35)", opacity: "0" },
         },
         "phone-shake": {
           "0%, 50%, 100%": { transform: "rotate(0deg)" },
@@ -86,8 +94,10 @@ export default {
       animation: {
         "fade-up": "fade-up 0.35s ease-out",
         "contact-enter": "contact-enter 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards",
+        "contact-header-enter": "contact-header-enter 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards",
         "contact-pulse": "contact-pulse 2.5s ease-in-out infinite",
         "contact-ring": "contact-ring 2s ease-out infinite",
+        "contact-ring-sm": "contact-ring-sm 2.2s ease-out infinite",
         "phone-shake": "phone-shake 3s ease-in-out infinite",
       },
     },

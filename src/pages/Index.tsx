@@ -75,7 +75,7 @@ export default function Index() {
       ) : activePlatform && activeService ? (
         <ServiceDetailPanel platform={activePlatform} service={activeService} />
       ) : null}
-      <ContactFloat />
+      {isHome && <ContactFloat />}
     </div>
   );
 }
